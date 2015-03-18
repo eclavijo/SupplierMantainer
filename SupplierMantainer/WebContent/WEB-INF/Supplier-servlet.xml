@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/tx  http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+
+	<!--AutoScan of classes -->
+	<context:component-scan base-package="controller" />
+	<context:component-scan base-package="dao" />
+
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+
+
+	<!--DB settings -->
+	<!--Jdbc properties -->
+	<context:property-placeholder location="/WEB-INF/jdbc.properties" />
+	<!-- Declare a datasource that has pooling capabilities -->
+	<bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="url" value="${app.jdbc.url}" />
+		<property name="username" value="${app.jdbc.username}" />
+		<property name="password" value="${app.jdbc.password}" />
+		<property name="driverClassName" value="${app.jdbc.driverClassName}" />
+	</bean>
+
+	<!-- Declare a transaction manager -->
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		p:dataSource-ref="dataSource" />
+
+	<!--sqlsession Template -->
+	<bean id="SqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate ">
+		<constructor-arg ref="sqlSessionFactory" />
+	</bean>
+
+	<!-- define the SqlSessionFactory, notice that configLocation is not needed 
+		when you use MapperFactoryBean -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="WEB-INF/mybatis/sqlmap-config.xml" />
+		<!-- <property name="mapperLocations" value="classpath*:Supplier.xml" /> -->
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="model" />
+	</bean>
+	
+	<!-- Define resource for js folder and css folder  -->
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:default-servlet-handler/>
+    <mvc:annotation-driven/>
+    
+</beans>
